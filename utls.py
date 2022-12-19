@@ -29,13 +29,13 @@ async def schedule_factory(arr: list, n: int) -> str:
     return message
 
 
-async def names_factory(name) -> bool | InlineKeyboardMarkup:
+async def names_factory(name: str, tp: str) -> bool | InlineKeyboardMarkup:
     """
     Возвращает inline клавиатуру с доступными именами
     :param name: ФИО
     :return: types.InlineKeyboardMarkup c ФИО | bool в случае ошибки
     """
-    arr = await requester.get_names(name)
+    arr = await requester.get_names(name, tp)
     if len(arr) == 0:
         return False
     names_arr = ((i["id"], i["label"]) for i in arr[:3])

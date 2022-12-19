@@ -59,19 +59,17 @@ async def get_schedule(message: types.Message):
     _id = message.from_user.id
     await bot.send_message(chat_id=_id, text=ru.get_day)
     redis_connection.set(_id, "sch")
-    pass
 
 
 @dp.message_handler(text=[ru.home])
 async def cmd_send_home(message: types.Message):
     await send_home(message.from_user.id)
-    pass
 
 
-@dp.message_handler(text=[ru.help])
+@dp.message_handler(text=[ru.choose_type])
 async def get_help(message: types.Message):
-    await bot.send_message(chat_id=message.from_user.id, text=ru.help_text)
-    pass
+    kb = {"inline_keyboard": [[{"text": "Группа", "callback_data": "group"}], [{"text": "Студент", "callback_data": "student"}], [{"text": "Преподаватель", "callback_data": "person"}], [{"text": "Аудитория", "callback_data": "auditorium"}]]}
+    await bot.send_message(chat_id=message.from_user.id, text=ru.type_text, reply_markup=kb)
 
 
 @dp.message_handler(text=[ru.change_user])
@@ -100,7 +98,8 @@ async def all_msg_handler(message: types.Message):
     state = redis_connection.get(message.from_user.id).decode()
     match state:
         case "name":
-            names = await utls.names_factory(text)
+            tp = await dbq.get_type(_id)
+            names = await utls.names_factory(text, tp)
             if not names:
                 await message.answer(ru.give_ur_name)
                 await message.answer(ru.try_again)
@@ -112,9 +111,7 @@ async def all_msg_handler(message: types.Message):
                 await message.answer(ru.try_again)
                 return
             sch = await dbq.get_schedule(_id)
-            print(sch)
             new_sch = await utls.schedule_factory(sch, int(text))
-            print(new_sch)
             return await message.answer(new_sch)
         case _:
             await message.answer(ru.smthng_wrong)
@@ -126,9 +123,22 @@ async def set_name(query: types.CallbackQuery, callback_data: typing.Dict[str, s
     _id = query.from_user.id
     await dbq.set_id(tg_id=_id, hse_id=callback_data["id"])
     await bot.send_message(_id, ru.succes)
-    await dbq.add_schedule(_id)
+    await dbq.add_schedule(_id, tp=await dbq.get_type(_id))
     await send_home(_id)
 
+
+
+@dp.callback_query_handler(text='group')
+@dp.callback_query_handler(text='person')
+@dp.callback_query_handler(text='student')
+@dp.callback_query_handler(text='auditorium')
+async def set_type(query: types.CallbackQuery):
+    _id = query.from_user.id
+    text = query.data
+    #print(query.message.message_id)
+    await bot.delete_message(query.from_user.id, query.message.message_id)
+    await bot.send_message(query.from_user.id, "Тип успешно выбран")
+    await dbq.set_type(tg_id=_id, tp=text)
 
 async def startup(*args) -> None:
     """

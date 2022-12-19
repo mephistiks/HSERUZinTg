@@ -1,7 +1,7 @@
 import asyncio
 import unittest
 import redis
-from aiogram.types import ReplyKeyboardMarkup
+from aiogram.types import ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
 
 import dbq
 import requester
@@ -25,9 +25,17 @@ class Tests(unittest.IsolatedAsyncioTestCase):
         pass
 
     async def test_kb_factory(self):
-        neight_higgers= {"keyboard": [[{"text": "a"}, {"text": "b"}]]}
+        nete_higgers= {"keyboard": [[{"text": "a"}, {"text": "b"}]]}
         var = dict(await utls.kb_factory(["a", "b"]))
-        self.assertEqual(neight_higgers, var)
+        self.assertEqual(nete_higgers, var)
+
+    async def test_name_factory(self):
+        nete_higgers= []
+        var = await utls.kb_factory("asdk;lkdl;asskadkdlsjajksladjaskld")
+        self.assertEqual(nete_higgers, var)
+
+
+
 
     async def test_name_factory(self):
         name = "kljasdkjlasdkljdajklasdjklsad"
@@ -37,14 +45,26 @@ class Tests(unittest.IsolatedAsyncioTestCase):
 
 
 async def main():
+    """
+    a = [("group", "Группа"), ("student", "Студент"), ("person", "Преподаватель"), ("auditorium", "Аудитория")]
+    markup = InlineKeyboardMarkup()
+    for tp, name in a:
+        markup.add(
+            InlineKeyboardButton(
+                name,
+                callback_data=tp
+            )
+        )
+    print(markup)
+    """
     #names = await requester.get_names("qwe")
     #print(names)
     #var = await utls.kb_factory(["a", "b"])
     #print(var)
     #dbq.start_db()
     #await dbq.add_schedule(609110006)
-    pairs = await requester.scheduller("366440")
-    print(pairs)
+    #pairs = await requester.scheduller("366440")
+    #print(pairs)
     pass
 
 
