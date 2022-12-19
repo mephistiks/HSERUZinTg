@@ -1,9 +1,6 @@
-import asyncio
-
 import requests
 import pendulum
 import json
-from datetime import datetime, timedelta
 
 async def scheduller(hse_id: str) -> list:
     """
@@ -30,7 +27,12 @@ async def scheduller(hse_id: str) -> list:
         new_arr.append(dic)
     return new_arr
 
-async def get_names(name: str):
+async def get_names(name: str) -> list:
+    """
+    Получаем доступные имена пользователей по данной строке
+    :param name: ФИО
+    :return: list с ФИО
+    """
     link = f"https://ruz.hse.ru/api/search?term={name}&type=student"
     qwe = requests.get(link)
     nick_gurs = json.loads(qwe.text)

@@ -1,3 +1,7 @@
+"""
+Здесь хранятся все конфигурации проекта
+"""
+
 DB_LINK="mongodb://mongo:mongo@localhost:27020/?authMechanism=DEFAULT"
 
 API_KEY="api"

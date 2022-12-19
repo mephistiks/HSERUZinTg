@@ -1,11 +1,13 @@
 import aiogram.utils.callback_data
 from aiogram import types
+from aiogram.types import InlineKeyboardMarkup
+
 import requester
 
 user_cb = aiogram.utils.callback_data.CallbackData('post', 'id', 'action')
-import pendulum
 
-async def schedule_factory(arr:list, n:int) -> str:
+
+async def schedule_factory(arr: list, n: int) -> str:
     """
     Если расписание содержит >=1 элемента, вызвращает текст с ним на определённый день недели, если 0, возвращается False
     :param arr: ответ от hse api с массивом расписания пользователя
@@ -18,23 +20,20 @@ async def schedule_factory(arr:list, n:int) -> str:
     for i in arr:
         if i["dayOfWeek"] == n:
             new_arr.append(i)
-    #new_arr = [i for i in arr if i["dayOfWeek"] == n]
     message = ""
     for ind, i in enumerate(new_arr):
         tmp = f"{ind}) {i['auditorium']} в {i['beginLesson']}\n"
-        tmp +=f"{i['discipline']}\n"
-        tmp +=f"{i['lecturer_title']}\n\n"
-        message+=tmp
+        tmp += f"{i['discipline']}\n"
+        tmp += f"{i['lecturer_title']}\n\n"
+        message += tmp
     return message
 
 
-
-
-async def names_factory(name) -> types.InlineKeyboardMarkup:
+async def names_factory(name) -> bool | InlineKeyboardMarkup:
     """
-    Ищет имя,
-    :param name:
-    :return:
+    Возвращает inline клавиатуру с доступными именами
+    :param name: ФИО
+    :return: types.InlineKeyboardMarkup c ФИО | bool в случае ошибки
     """
     arr = await requester.get_names(name)
     if len(arr) == 0:
@@ -54,4 +53,3 @@ async def kb_factory(btns: list):
     keyboard = types.ReplyKeyboardMarkup(row_width=2)
     keyboard.add(*(types.KeyboardButton(text) for text in btns))
     return keyboard
-

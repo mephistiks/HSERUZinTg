@@ -27,22 +27,25 @@ dp = Dispatcher(bot)
 
 redis_connection: redis.client.Redis
 
-async def clear(tg_id: int):
+
+async def clear(tg_id: int) -> None:
     """
-    очищает стейт пользователя
+    очищает стейт пользователя в редисе
     """
     redis_connection.set(tg_id, "home")
 
-async def send_home(tg_id:int):
+
+async def send_home(tg_id: int) -> None:
     """
     переносит пользователя на стартовую страницу кнопок
     """
     await clear(tg_id)
     kb = await kb_factory(ru.main_menu)
-    await bot.send_message(chat_id=tg_id,text=ru.home, reply_markup=kb)
+    await bot.send_message(chat_id=tg_id, text=ru.home, reply_markup=kb)
+
 
 @dp.message_handler(commands=['start', 'help'])
-async def function(message: types.Message):
+async def start_cmd_handler(message: types.Message):
     """
     Отлавливатель /start
     """
@@ -58,15 +61,18 @@ async def get_schedule(message: types.Message):
     redis_connection.set(_id, "sch")
     pass
 
+
 @dp.message_handler(text=[ru.home])
 async def cmd_send_home(message: types.Message):
     await send_home(message.from_user.id)
     pass
 
+
 @dp.message_handler(text=[ru.help])
 async def get_help(message: types.Message):
     await bot.send_message(chat_id=message.from_user.id, text=ru.help_text)
     pass
+
 
 @dp.message_handler(text=[ru.change_user])
 async def change_user(message: types.Message):
@@ -115,7 +121,6 @@ async def all_msg_handler(message: types.Message):
             send_home(_id)
 
 
-
 @dp.callback_query_handler(utls.user_cb.filter(action='choose'))
 async def set_name(query: types.CallbackQuery, callback_data: typing.Dict[str, str]):
     _id = query.from_user.id
@@ -125,7 +130,11 @@ async def set_name(query: types.CallbackQuery, callback_data: typing.Dict[str, s
     await send_home(_id)
 
 
-async def startup(*args):
+async def startup(*args) -> None:
+    """
+    Запуск подключений к MongoDB и Redis
+    :param args: нужно для отлова все параметров котоыре перадаёт executor.start_polling, иначе не запускается
+    """
     dbq.start_db()
     global redis_connection
     redis_connection = redis.Redis(host=settings.redis_host, port=settings.redis_port)
